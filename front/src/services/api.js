@@ -101,7 +101,7 @@ class ApiClient {
   }
 }
 
-// Create API client instance
+// API client instance
 const apiClient = new ApiClient(API_BASE_URL);
 
 // Auth API
@@ -128,5 +128,4 @@ export const generalAPI = {
   healthCheck: () => apiClient.get("/health", {}, { includeAuth: false }),
 };
 
-// Export the client for custom requests
 export default apiClient;
