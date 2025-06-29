@@ -43,7 +43,7 @@ const Input = forwardRef(
 
         {helper && !error && <div className="input-helper">{helper}</div>}
 
-        {error && <div className="input-error-message">❌ {error}</div>}
+        {error && <div className="input-error-message"> {error}</div>}
       </div>
     );
   }

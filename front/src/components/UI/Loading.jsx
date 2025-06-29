@@ -1,4 +1,5 @@
 import React from "react";
+import { FiLoader } from "react-icons/fi";
 
 const Loading = ({
   message = "Завантаження...",
@@ -55,7 +56,10 @@ export const Spinner = ({ size = "small", className = "" }) => (
 );
 
 // Simple text loading
-export const TextLoading = ({ children = "Завантаження...", icon = "⏳" }) => (
+export const TextLoading = ({
+  children = "Завантаження...",
+  icon = <FiLoader />,
+}) => (
   <div className="text-loading">
     <span className="loading-icon">{icon}</span>
     <span className="loading-text">{children}</span>

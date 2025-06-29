@@ -1,4 +1,5 @@
 import React from "react";
+import { FiLoader } from "react-icons/fi";
 
 const Button = ({
   children,
@@ -46,7 +47,11 @@ const Button = ({
       disabled={disabled || loading}
       {...props}
     >
-      {loading && <span className="btn-spinner">⏳</span>}
+      {loading && (
+        <span className="btn-spinner">
+          <FiLoader className="spinner-icon" />
+        </span>
+      )}
       {icon && !loading && <span className="btn-icon">{icon}</span>}
       <span className="btn-content">{children}</span>
     </button>

@@ -51,7 +51,18 @@ class ApiClient {
           errorMessage = errorData.detail || errorMessage;
         } catch {
           // If response is not JSON, use status text
-          errorMessage = response.statusText || errorMessage;
+          if (response.status === 401) {
+            errorMessage = "Not authenticated";
+          } else if (response.status === 403) {
+            errorMessage = "Access forbidden";
+          } else {
+            errorMessage = response.statusText || errorMessage;
+          }
+        }
+
+        // Log only non-auth errors to avoid spam
+        if (response.status !== 401 && response.status !== 403) {
+          console.error(`API Error (${endpoint}):`, errorMessage);
         }
 
         throw new Error(errorMessage);
@@ -65,7 +76,13 @@ class ApiClient {
         return await response.text();
       }
     } catch (error) {
-      console.error(`API Error (${endpoint}):`, error);
+      // Only log non-auth errors
+      if (
+        !error.message.includes("authenticated") &&
+        !error.message.includes("forbidden")
+      ) {
+        console.error(`API Error (${endpoint}):`, error);
+      }
       throw error;
     }
   }

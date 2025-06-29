@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { telegramAPI } from "../services/api.js";
 import { SUCCESS_MESSAGES, TELEGRAM_CONFIG } from "../utils/constants.js";
 
-export const useTelegram = () => {
+export const useTelegram = (isAuthenticated = false) => {
   const [isConnected, setIsConnected] = useState(false);
   const [status, setStatus] = useState(null);
   const [chats, setChats] = useState([]);
@@ -10,12 +10,26 @@ export const useTelegram = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Check Telegram connection status on mount
+  // Check Telegram connection status only when user is authenticated
   useEffect(() => {
-    checkStatus();
-  }, []);
+    if (isAuthenticated) {
+      checkStatus();
+    } else {
+      // Reset state when user is not authenticated
+      setIsConnected(false);
+      setStatus(null);
+      setChats([]);
+      setMessages([]);
+      setError(null);
+    }
+  }, [isAuthenticated]);
 
   const checkStatus = useCallback(async () => {
+    // Don't check status if user is not authenticated
+    if (!isAuthenticated) {
+      return null;
+    }
+
     try {
       const statusData = await telegramAPI.getStatus();
       setStatus(statusData);
@@ -23,28 +37,51 @@ export const useTelegram = () => {
       return statusData;
     } catch (error) {
       console.error("Failed to check Telegram status:", error);
+
+      // Don't set error for authentication issues
+      if (
+        error.message.includes("authenticated") ||
+        error.message.includes("401")
+      ) {
+        console.log("User not authenticated, skipping Telegram status check");
+        return null;
+      }
+
       setError(error.message);
       return null;
     }
-  }, []);
+  }, [isAuthenticated]);
 
-  const connect = useCallback(async (phoneNumber) => {
-    setLoading(true);
-    setError(null);
+  const connect = useCallback(
+    async (phoneNumber) => {
+      if (!isAuthenticated) {
+        return { success: false, error: "User not authenticated" };
+      }
 
-    try {
-      const response = await telegramAPI.connect({ phone_number: phoneNumber });
-      return { success: true, data: response };
-    } catch (error) {
-      setError(error.message);
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await telegramAPI.connect({
+          phone_number: phoneNumber,
+        });
+        return { success: true, data: response };
+      } catch (error) {
+        setError(error.message);
+        return { success: false, error: error.message };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isAuthenticated]
+  );
 
   const verify = useCallback(
     async (verificationData) => {
+      if (!isAuthenticated) {
+        return { success: false, error: "User not authenticated" };
+      }
+
       setLoading(true);
       setError(null);
 
@@ -69,10 +106,14 @@ export const useTelegram = () => {
         setLoading(false);
       }
     },
-    [checkStatus]
+    [checkStatus, isAuthenticated]
   );
 
   const disconnect = useCallback(async () => {
+    if (!isAuthenticated) {
+      return { success: false, error: "User not authenticated" };
+    }
+
     setLoading(true);
     setError(null);
 
@@ -89,9 +130,13 @@ export const useTelegram = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const loadChats = useCallback(async () => {
+    if (!isAuthenticated) {
+      return { success: false, error: "User not authenticated" };
+    }
+
     setLoading(true);
     setError(null);
 
@@ -105,10 +150,14 @@ export const useTelegram = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const loadMessages = useCallback(
     async (chatId, limit = TELEGRAM_CONFIG.DEFAULT_MESSAGE_LIMIT) => {
+      if (!isAuthenticated) {
+        return { success: false, error: "User not authenticated" };
+      }
+
       setLoading(true);
       setError(null);
 
@@ -123,7 +172,7 @@ export const useTelegram = () => {
         setLoading(false);
       }
     },
-    []
+    [isAuthenticated]
   );
 
   const clearError = useCallback(() => {

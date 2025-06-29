@@ -1,5 +1,25 @@
 import os
 from typing import List
+from pathlib import Path
+
+try:
+    from dotenv import load_dotenv
+    
+    current_dir = Path(__file__).parent
+    env_path = current_dir.parent / '.env'  
+    if env_path.exists():
+        load_dotenv(env_path)
+        print(f"✅ Завантажено .env з {env_path}")
+    else:
+        env_path = current_dir / '.env'
+        if env_path.exists():
+            load_dotenv(env_path)
+            print(f"✅ Завантажено .env з {env_path}")
+        else:
+            print(f"⚠️ .env файл не знайдено в {current_dir.parent} або {current_dir}")
+            
+except ImportError:
+    print("❌ python-dotenv не встановлено!")
 
 class Settings:
     # App settings
@@ -36,10 +56,21 @@ class Settings:
     if os.getenv("FRONTEND_URL"):
         ALLOWED_ORIGINS.append(os.getenv("FRONTEND_URL"))
     
+    def __init__(self):
+        # Виводимо налагоджувальну інформацію
+        print(f"🔧 Конфігурація створена:")
+        print(f"   - API_ID з змінної: {os.getenv('TELEGRAM_API_ID', 'НЕ ЗНАЙДЕНО')}")
+        print(f"   - API_HASH з змінної: {os.getenv('TELEGRAM_API_HASH', 'НЕ ЗНАЙДЕНО')}")
+        print(f"   - JWT_SECRET з змінної: {os.getenv('JWT_SECRET', 'НЕ ЗНАЙДЕНО')}")
+        print(f"   - Підсумок API_ID: {self.TELEGRAM_API_ID}")
+        print(f"   - Підсумок API_HASH: {'встановлено' if self.TELEGRAM_API_HASH else 'НЕ встановлено'}")
+    
     @property
     def telegram_configured(self) -> bool:
         """Check if Telegram API credentials are configured"""
-        return self.TELEGRAM_API_ID > 0 and len(self.TELEGRAM_API_HASH) > 0
+        is_configured = self.TELEGRAM_API_ID > 0 and len(self.TELEGRAM_API_HASH) > 0
+        print(f"🔍 telegram_configured: {is_configured} (API_ID: {self.TELEGRAM_API_ID}, API_HASH length: {len(self.TELEGRAM_API_HASH)})")
+        return is_configured
 
 # Create settings instance
 settings = Settings()

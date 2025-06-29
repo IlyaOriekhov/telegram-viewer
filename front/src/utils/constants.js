@@ -11,7 +11,7 @@ export const STORAGE_KEYS = {
 export const APP_CONFIG = {
   NAME: "Telegram Message Viewer",
   VERSION: "1.0.0",
-  AUTHOR: "Your Name",
+  AUTHOR: "onelaack",
 };
 
 // Telegram Configuration
@@ -33,13 +33,6 @@ export const CHAT_TYPES = {
   USER: "user",
   GROUP: "group",
   CHANNEL: "channel",
-};
-
-// Chat Type Icons
-export const CHAT_ICONS = {
-  [CHAT_TYPES.USER]: "👤",
-  [CHAT_TYPES.GROUP]: "👥",
-  [CHAT_TYPES.CHANNEL]: "📢",
 };
 
 // Message Types
